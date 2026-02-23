@@ -1,797 +1,791 @@
 <!DOCTYPE html>
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Content Decay Monitor – WordPress Plugin for Content Freshness Scoring</title>
-    <meta name="description" content="Content Decay Monitor is a free WordPress plugin that scans posts and generates a Content Freshness Score (0–100). Detects outdated publish dates, stale year references, low word count, and missing internal links. Admin-only, no external APIs.">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Decay Monitor – WordPress Plugin for Content Freshness Scoring</title>
+<meta name="description" content="Content Decay Monitor is a free WordPress plugin that scans posts and generates a Content Freshness Score (0–100). Detects outdated publish dates, stale year references, low word count, and missing internal links. Admin-only, no external APIs.">
+<link rel="canonical" href="https://stantchev.github.io/content-decay-monitor-wordpress-plugin/">
+<meta property="og:title" content="Content Decay Monitor – WordPress Content Freshness Scoring Plugin">
+<meta property="og:description" content="Automatically scores every post 0–100 based on age, stale year references, word count, and internal linking. Surface decaying content before it hurts your rankings.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://stantchev.github.io/content-decay-monitor-wordpress-plugin/">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Content Decay Monitor","operatingSystem":"WordPress","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"softwareVersion":"1.0.0","license":"GPL-2.0"}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET ─── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+img,svg{max-width:100%;display:block}
 
-    <!-- Canonical -->
-    <link rel="canonical" href="https://your-org.github.io/content-decay-monitor/">
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="Content Decay Monitor – WordPress Content Freshness Scoring Plugin">
-    <meta property="og:description" content="Automatically scores every post 0–100 based on age, stale year references, word count, and internal linking. Surface decaying content before it hurts your rankings.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://your-org.github.io/content-decay-monitor/">
-
-    <!-- Twitter / X -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Content Decay Monitor – WordPress Plugin">
-    <meta name="twitter:description" content="Freshness Score (0–100) for every post. Detect outdated content before it hurts your rankings.">
-
-    <!-- Schema.org -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Content Decay Monitor",
-      "operatingSystem": "WordPress",
-      "applicationCategory": "BusinessApplication",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-      "softwareVersion": "1.0.0",
-      "license": "GPL-2.0"
-    }
-    </script>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
-
-    <style>
-/* ─── RESET ─────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-/* ─── TOKENS ─────────────────────────────────── */
-:root {
-    --ink:   #0a0a0c;
-    --ink-2: #252528;
-    --ink-3: #5a5a66;
-    --ink-4: #9898a8;
-    --paper:   #f3f2ee;
-    --paper-2: #eae8e0;
-    --white:   #ffffff;
-
-    /* Brand — amber/burnt orange to evoke decay / urgency */
-    --accent:   #c9500a;
-    --accent-2: #e8600e;
-    --accent-bg: #fff4ed;
-
-    /* Score levels */
-    --green:    #1a7a3f; --green-bg:  #edfaf2; --green-border: #6ee7b7;
-    --amber:    #b45309; --amber-bg:  #fffbeb; --amber-border: #fcd34d;
-    --red:      #c0102b; --red-bg:    #fff1f2; --red-border:   #fca5a5;
-
-    --r-sm: 6px; --r-md: 10px; --r-lg: 18px;
-    --shadow-sm: 0 1px 4px rgba(0,0,0,.07), 0 0 0 1px rgba(0,0,0,.04);
-    --shadow-md: 0 4px 20px rgba(0,0,0,.10), 0 0 0 1px rgba(0,0,0,.04);
-    --shadow-lg: 0 12px 48px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.06);
-
-    --font-serif: 'DM Serif Display', Georgia, serif;
-    --font-body:  'DM Sans', system-ui, sans-serif;
-    --font-mono:  'DM Mono', 'Courier New', monospace;
+/* ─── TOKENS ─── */
+:root{
+  --ink:#0a0a0c; --ink-2:#252528; --ink-3:#5a5a66; --ink-4:#9898a8;
+  --paper:#f3f2ee; --paper-2:#eae8e0; --white:#fff;
+  --accent:#c9500a; --accent-bg:#fff4ed;
+  --green:#1a7a3f; --green-bg:#edfaf2; --green-border:#6ee7b7;
+  --amber:#b45309; --amber-bg:#fffbeb; --amber-border:#fcd34d;
+  --red:#c0102b;   --red-bg:#fff1f2;   --red-border:#fca5a5;
+  --r-sm:6px; --r-md:10px; --r-lg:16px;
+  --shadow-sm:0 1px 4px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04);
+  --shadow-md:0 4px 20px rgba(0,0,0,.10),0 0 0 1px rgba(0,0,0,.04);
+  --shadow-lg:0 12px 48px rgba(0,0,0,.14),0 0 0 1px rgba(0,0,0,.06);
+  --font-serif:'DM Serif Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --font-mono:'DM Mono','Courier New',monospace;
 }
-html  { scroll-behavior: smooth; }
-body  { font-family: var(--font-body); background: var(--paper); color: var(--ink); line-height: 1.65; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
-/* ─── LAYOUT ─────────────────────────────────── */
-.container   { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-.section     { padding: clamp(40px,7vw,64px) 20px; border-bottom: 1px solid var(--paper-2); }
-.section-alt { background: var(--paper-2); }
+/* ─── BASE ─── */
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--paper);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
-/* ─── LABELS / TITLES ────────────────────────── */
-.section-label { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
-.section-label::before { content: ""; display: inline-block; width: 18px; height: 1px; background: var(--accent); }
-.section-title { font-family: var(--font-serif); font-size: clamp(22px,4vw,40px); line-height: 1.1; letter-spacing: -.02em; color: var(--ink); margin-bottom: 10px; }
-.section-desc  { font-size: 15px; color: var(--ink-3); max-width: 560px; margin-bottom: 36px; font-weight: 300; }
+/* ─── LAYOUT ─── */
+.wrap{width:100%;max-width:1100px;margin:0 auto;padding:0 clamp(16px,5vw,32px)}
+.section{padding:clamp(36px,7vw,64px) 0;border-bottom:1px solid var(--paper-2)}
+.section-inner{width:100%;max-width:1100px;margin:0 auto;padding:0 clamp(16px,5vw,32px)}
+.section-alt{background:var(--paper-2)}
 
-/* ─── HERO ───────────────────────────────────── */
-.hero { background: var(--ink); color: var(--white); padding: clamp(44px,8vw,80px) 20px clamp(36px,7vw,72px); position: relative; overflow: hidden; }
-.hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 80% -10%, rgba(201,80,10,.4) 0%, transparent 70%), radial-gradient(ellipse 40% 60% at -5% 100%, rgba(201,80,10,.18) 0%, transparent 60%); pointer-events: none; }
-.hero::after  { content: ""; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,.025) 39px, rgba(255,255,255,.025) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.025) 39px, rgba(255,255,255,.025) 40px); pointer-events: none; }
-.hero-inner   { position: relative; z-index: 1; }
+/* ─── SECTION LABELS ─── */
+.label{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.label::before{content:"";display:inline-block;width:16px;height:1px;background:var(--accent)}
+.title{font-family:var(--font-serif);font-size:clamp(22px,5vw,40px);line-height:1.1;letter-spacing:-.02em;color:var(--ink);margin-bottom:8px}
+.desc{font-size:15px;color:var(--ink-3);margin-bottom:28px;font-weight:300;max-width:560px}
 
-.hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: 24px; }
-.hero-eyebrow span { display: inline-block; width: 24px; height: 1px; background: rgba(255,255,255,.25); }
-.hero h1 { font-family: var(--font-serif); font-size: clamp(32px,6vw,72px); line-height: 1.05; letter-spacing: -.02em; margin-bottom: 20px; }
-.hero h1 em { font-style: italic; color: rgba(255,255,255,.45); }
-.hero-sub { font-size: clamp(15px,2vw,17px); color: rgba(255,255,255,.58); max-width: 520px; margin-bottom: 28px; font-weight: 300; line-height: 1.7; }
-.hero-badges { display: flex; gap: 8px; flex-wrap: wrap; }
-.badge         { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 500; white-space: nowrap; }
-.badge-outline { border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.75); }
-.badge-filled  { background: var(--accent); color: #fff; }
-.badge-green   { background: rgba(26,122,63,.3); border: 1px solid rgba(26,122,63,.5); color: #4ade80; }
+/* ─────────────────────────────────────────────
+   BURGER NAV
+───────────────────────────────────────────── */
+.burger-nav{
+  position:sticky;top:0;z-index:200;
+  background:var(--ink);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.burger-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(16px,5vw,32px);height:52px;
+}
+.burger-brand{
+  font-family:var(--font-mono);font-size:12px;
+  color:rgba(255,255,255,.55);letter-spacing:.06em;white-space:nowrap;
+}
+.burger-brand strong{color:var(--accent)}
+.burger-btn{
+  display:flex;flex-direction:column;justify-content:center;gap:5px;
+  width:38px;height:38px;padding:7px;
+  background:none;border:1px solid rgba(255,255,255,.15);border-radius:var(--r-sm);
+  cursor:pointer;flex-shrink:0;
+}
+.burger-btn span{
+  display:block;height:1.5px;background:rgba(255,255,255,.75);border-radius:2px;
+  transition:transform .25s,opacity .25s;transform-origin:center;
+}
+.burger-nav.open .burger-btn span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.burger-nav.open .burger-btn span:nth-child(2){opacity:0}
+.burger-nav.open .burger-btn span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+.burger-drop{
+  max-height:0;overflow:hidden;
+  transition:max-height .3s ease;
+  background:#111113;border-top:1px solid rgba(255,255,255,.06);
+}
+.burger-nav.open .burger-drop{max-height:420px}
+.burger-drop a{
+  display:flex;align-items:center;gap:12px;
+  padding:13px clamp(16px,5vw,32px);
+  font-size:13px;font-weight:500;
+  color:rgba(255,255,255,.6);text-decoration:none;
+  font-family:var(--font-mono);letter-spacing:.04em;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  transition:background .15s,color .15s;
+}
+.burger-drop a:last-child{border-bottom:none}
+.burger-drop a:hover{background:rgba(255,255,255,.04);color:#fff}
+.burger-drop a .ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
 
-@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-.hero-inner > * { animation: fadeUp .6s ease both; }
-.hero-inner > *:nth-child(1) { animation-delay: .05s; }
-.hero-inner > *:nth-child(2) { animation-delay: .15s; }
-.hero-inner > *:nth-child(3) { animation-delay: .25s; }
-.hero-inner > *:nth-child(4) { animation-delay: .35s; }
+/* ─────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────── */
+.hero{
+  background:var(--ink);color:var(--white);
+  padding:clamp(40px,8vw,80px) clamp(16px,5vw,32px) clamp(36px,7vw,72px);
+  position:relative;overflow:hidden;
+}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% -10%,rgba(201,80,10,.4) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at -5% 100%,rgba(201,80,10,.18) 0%,transparent 60%);pointer-events:none}
+.hero::after{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.02) 39px,rgba(255,255,255,.02) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.02) 39px,rgba(255,255,255,.02) 40px);pointer-events:none}
+.hero-inner{position:relative;z-index:1;max-width:1100px;margin:0 auto}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:20px}
+.hero-eyebrow span{display:inline-block;width:20px;height:1px;background:rgba(255,255,255,.25)}
+.hero h1{font-family:var(--font-serif);font-size:clamp(28px,7vw,72px);line-height:1.05;letter-spacing:-.02em;margin-bottom:18px}
+.hero h1 em{font-style:italic;color:rgba(255,255,255,.4)}
+.hero-sub{font-size:clamp(14px,2.5vw,17px);color:rgba(255,255,255,.55);max-width:520px;margin-bottom:24px;font-weight:300;line-height:1.7}
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:500;white-space:nowrap}
+.badge-outline{border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.75)}
+.badge-filled{background:var(--accent);color:#fff}
+.badge-green{background:rgba(26,122,63,.3);border:1px solid rgba(26,122,63,.5);color:#4ade80}
 
-/* ─── SCORE HERO VISUAL ──────────────────────── */
-.score-hero { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 20px; }
-.score-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: var(--r-md); padding: 16px 18px; }
-.score-card-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: 8px; }
-.score-card-num   { font-family: var(--font-serif); font-size: 42px; line-height: 1; letter-spacing: -.03em; }
-.score-card-num.green  { color: #4ade80; }
-.score-card-num.amber  { color: #fbbf24; }
-.score-card-num.red    { color: #f87171; }
-.score-card-post  { font-size: 11px; color: rgba(255,255,255,.4); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.score-card-risk  { display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
-.risk-low    { background: rgba(26,122,63,.3); color: #4ade80; }
-.risk-medium { background: rgba(180,83,9,.35); color: #fbbf24; }
-.risk-high   { background: rgba(192,16,43,.35); color: #f87171; }
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.hero-inner>*{animation:fadeUp .6s ease both}
+.hero-inner>*:nth-child(1){animation-delay:.05s}
+.hero-inner>*:nth-child(2){animation-delay:.15s}
+.hero-inner>*:nth-child(3){animation-delay:.25s}
+.hero-inner>*:nth-child(4){animation-delay:.35s}
+.hero-inner>*:nth-child(5){animation-delay:.45s}
 
-/* ─── FEATURES GRID ─────────────────────────── */
-.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--paper-2); border: 1px solid var(--paper-2); border-radius: var(--r-lg); overflow: hidden; }
-.feature-item { background: var(--white); padding: 24px 20px; transition: background .2s; position: relative; }
-.feature-item:hover { background: #fafaf8; }
-.feature-icon { font-size: 22px; margin-bottom: 10px; display: block; }
-.feature-item h3 { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
-.feature-item p  { font-size: 12px; color: var(--ink-3); line-height: 1.55; }
+/* Score cards */
+.score-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:24px}
+.sc{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-md);padding:16px}
+.sc-lbl{font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px}
+.sc-num{font-family:var(--font-serif);font-size:clamp(34px,6vw,48px);line-height:1;letter-spacing:-.03em}
+.sc-num.g{color:#4ade80}.sc-num.a{color:#fbbf24}.sc-num.r{color:#f87171}
+.sc-post{font-size:11px;color:rgba(255,255,255,.4);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-risk{display:inline-block;margin-top:6px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px}
+.rl{background:rgba(26,122,63,.3);color:#4ade80}
+.rm{background:rgba(180,83,9,.35);color:#fbbf24}
+.rh{background:rgba(192,16,43,.35);color:#f87171}
 
-/* ─── SCORE MODEL TABLE ──────────────────────── */
-.score-model { background: var(--white); border: 1px solid var(--paper-2); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-md); }
-.sm-header { background: var(--ink); color: var(--white); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
-.sm-header-title { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; }
-.sm-header-score { font-family: var(--font-serif); font-size: 28px; color: rgba(255,255,255,.35); }
-.sm-row { display: grid; grid-template-columns: 2.5fr 1fr 3fr; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--paper-2); align-items: center; }
-.sm-row:last-child { border-bottom: none; }
-.sm-row:hover { background: #fafaf8; }
-.sm-signal { font-size: 13px; color: var(--ink-2); font-weight: 500; display: flex; align-items: center; gap: 8px; }
-.sm-deduction { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--red); text-align: center; }
-.sm-logic  { font-size: 11px; color: var(--ink-4); }
-.sm-bar-wrap { display: flex; align-items: center; gap: 8px; }
-.sm-bar    { height: 6px; border-radius: 10px; background: var(--red-bg); flex: 1; overflow: hidden; }
-.sm-bar-fill { height: 100%; border-radius: 10px; background: var(--red); }
-.sm-col-head { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-4); }
-.sm-head { background: var(--paper-2); }
+/* ─────────────────────────────────────────────
+   FEATURES
+───────────────────────────────────────────── */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--paper-2);border:1px solid var(--paper-2);border-radius:var(--r-lg);overflow:hidden}
+.fi{background:var(--white);padding:22px 18px;transition:background .2s}
+.fi:hover{background:#fafaf8}
+.fi-icon{font-size:22px;margin-bottom:8px}
+.fi h3{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.fi p{font-size:12px;color:var(--ink-3);line-height:1.55}
 
-/* ─── BROWSER CHROME ─────────────────────────── */
-.browser-chrome { background: #2c3035; height: 34px; display: flex; align-items: center; padding: 0 14px; gap: 6px; }
-.bc-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.bc-red    { background: #ff5f57; }
-.bc-yellow { background: #ffbd2e; }
-.bc-green  { background: #28c840; }
-.bc-url    { margin: 0 auto; background: rgba(255,255,255,.07); color: rgba(255,255,255,.35); font-size: 11px; padding: 2px 12px; border-radius: 20px; font-family: var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 55%; }
+/* ─────────────────────────────────────────────
+   SCORE MODEL
+───────────────────────────────────────────── */
+.score-model{background:var(--white);border:1px solid var(--paper-2);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-md)}
+.sm-hdr{background:var(--ink);color:var(--white);padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.sm-hdr-title{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em}
+.sm-hdr-num{font-family:var(--font-serif);font-size:26px;color:rgba(255,255,255,.3)}
+.sm-cols{display:grid;grid-template-columns:1fr auto;gap:0}
+.sm-row{display:grid;grid-template-columns:1fr 80px;padding:14px 20px;border-bottom:1px solid var(--paper-2);align-items:center;gap:12px}
+.sm-row:last-child{border-bottom:none}
+.sm-row:hover{background:#fafaf8}
+.sm-row.sm-head{background:var(--paper-2);font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-4)}
+.sm-signal{font-size:13px;color:var(--ink-2);font-weight:500}
+.sm-signal small{display:block;font-size:11px;color:var(--ink-4);font-weight:400;margin-top:2px}
+.sm-pts{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--red);text-align:right}
 
-/* ─── ADMIN PAGE MOCKUP ──────────────────────── */
-.admin-mockup { background: #f0f0f1; border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-lg); }
-.admin-topbar { background: #1d2327; height: 32px; display: flex; align-items: center; padding: 0 14px; gap: 8px; }
-.admin-topbar-dot { width: 8px; height: 8px; border-radius: 50%; }
-.admin-layout { display: flex; min-height: 360px; }
-.admin-sidebar { width: 148px; background: #1d2327; padding: 12px 0; flex-shrink: 0; }
-.admin-menu-item { padding: 7px 12px; font-size: 11px; color: rgba(255,255,255,.6); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-.admin-menu-item.active { background: rgba(255,255,255,.07); color: #fff; border-left: 2px solid var(--accent); padding-left: 10px; }
-.admin-menu-sep { height: 1px; background: rgba(255,255,255,.06); margin: 6px 0; }
-.admin-body { flex: 1; padding: 14px; min-width: 0; overflow: hidden; }
-.admin-heading { font-size: 14px; font-weight: 700; color: #1d2327; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
-.admin-run-btn { background: var(--accent); color: #fff; border: none; border-radius: 4px; font-size: 10px; font-weight: 700; padding: 5px 12px; cursor: pointer; font-family: var(--font-body); }
+/* ─────────────────────────────────────────────
+   ADMIN MOCKUP
+───────────────────────────────────────────── */
+.mockup-wrap{background:#f0f0f1;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-lg)}
+.mock-chrome{background:#2c3035;height:34px;display:flex;align-items:center;padding:0 14px;gap:6px}
+.mock-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.mock-url{margin:0 auto;background:rgba(255,255,255,.07);color:rgba(255,255,255,.35);font-size:10px;padding:2px 10px;border-radius:20px;font-family:var(--font-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%}
+.mock-layout{display:flex}
+.mock-sb{width:140px;background:#1d2327;padding:10px 0;flex-shrink:0}
+.mock-sb-item{padding:7px 12px;font-size:10px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.mock-sb-item.on{background:rgba(255,255,255,.07);color:#fff;border-left:2px solid var(--accent);padding-left:10px}
+.mock-sb-sep{height:1px;background:rgba(255,255,255,.06);margin:5px 0}
+.mock-body{flex:1;padding:14px;min-width:0;overflow:hidden}
+.mock-heading{font-size:13px;font-weight:700;color:#1d2327;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mock-btn{background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:10px;font-weight:700;padding:5px 12px;cursor:pointer;white-space:nowrap}
+.mock-note{font-size:10px;color:#646970;margin-bottom:10px}
 
-/* Dashboard table */
-.dash-table { background: var(--white); border: 1px solid #dcdcdc; border-radius: var(--r-sm); overflow: hidden; }
-.dt-head, .dt-row { display: grid; grid-template-columns: 2.2fr 80px 90px 120px 80px; gap: 8px; padding: 8px 12px; align-items: center; }
-.dt-head { background: #f6f7f7; border-bottom: 1px solid #dcdcdc; font-size: 10px; font-weight: 700; color: #1d2327; }
-.dt-row  { border-bottom: 1px solid #f0f0f0; font-size: 11px; color: #2c3338; }
-.dt-row:last-child { border-bottom: none; }
-.dt-row:hover { background: #fafafa; }
-.dt-title { font-weight: 600; color: #2271b1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Dashboard table — no fixed widths, flex instead */
+.dt{background:var(--white);border:1px solid #dcdcdc;border-radius:var(--r-sm);overflow:hidden}
+.dt-head,.dt-row{display:flex;padding:8px 10px;align-items:center;gap:8px;border-bottom:1px solid #f0f0f0;font-size:10px}
+.dt-head{background:#f6f7f7;border-bottom:1px solid #dcdcdc;font-weight:700;color:#1d2327}
+.dt-row:last-child{border-bottom:none}
+.dt-row:hover{background:#fafafa}
+.dt-title{flex:1;font-weight:600;color:#2271b1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.dt-score{width:46px;text-align:center;flex-shrink:0}
+.dt-risk{width:60px;flex-shrink:0}
+.dt-action{width:52px;flex-shrink:0}
+.dt-date{width:70px;color:#646970;flex-shrink:0}
 
 /* Score badges */
-.cdm-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; padding: 3px 9px; border-radius: 12px; font-size: 12px; font-weight: 700; font-family: var(--font-mono); }
-.cdm-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-border); }
-.cdm-amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-border); }
-.cdm-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-border); }
-.cdm-na     { background: #f3f4f6; color: #9ca3af; border: 1px solid #d1d5db; font-size: 10px; }
-.risk-badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 100px; font-weight: 600; }
-.risk-badge.low    { background: var(--green-bg); color: var(--green); }
-.risk-badge.medium { background: var(--amber-bg); color: var(--amber); }
-.risk-badge.high   { background: var(--red-bg);   color: var(--red); }
+.badge-score{display:inline-flex;align-items:center;justify-content:center;min-width:36px;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:700;font-family:var(--font-mono)}
+.bg{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.ba{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.br{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.bna{background:#f3f4f6;color:#9ca3af;border:1px solid #d1d5db;font-size:10px}
+.risk-pill{display:inline-block;font-size:9px;padding:1px 6px;border-radius:100px;font-weight:600}
+.risk-pill.lo{background:var(--green-bg);color:var(--green)}
+.risk-pill.me{background:var(--amber-bg);color:var(--amber)}
+.risk-pill.hi{background:var(--red-bg);color:var(--red)}
+.dt-btn{font-size:9px;border:1px solid #c3c4c7;padding:2px 6px;border-radius:3px;color:#2c3338;background:#fff;cursor:pointer;white-space:nowrap}
 
-/* ─── POSTS LIST MOCKUP ──────────────────────── */
-.table-mockup { background: var(--white); border: 1px solid #dcdcdc; border-radius: var(--r-md); overflow-x: auto; box-shadow: var(--shadow-md); }
-.tm-inner { min-width: 580px; }
-.tm-header-row, .tm-row { display: grid; grid-template-columns: 2.5fr 80px 1.5fr 1fr; padding: 0 14px; align-items: center; }
-.tm-header-row { background: #f6f7f7; font-size: 11px; font-weight: 700; color: #1d2327; padding-top: 10px; padding-bottom: 10px; }
-.tm-row { padding-top: 12px; padding-bottom: 12px; border-top: 1px solid #f0f0f0; font-size: 12px; color: #2c3338; }
-.tm-row:hover { background: #fafafa; }
-.tm-title { font-weight: 600; color: #2271b1; line-height: 1.3; }
-.tm-type  { display: inline-block; font-size: 10px; background: #f0f0f1; border-radius: 3px; padding: 1px 5px; color: #646970; margin-top: 2px; }
-.tm-last  { font-size: 11px; color: #646970; }
+/* ─────────────────────────────────────────────
+   POSTS LIST MOCKUP
+───────────────────────────────────────────── */
+.posts-mockup{background:var(--white);border:1px solid #dcdcdc;border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-md)}
+.pt-head,.pt-row{display:flex;padding:10px 14px;align-items:center;gap:10px;border-bottom:1px solid #f0f0f0;font-size:11px}
+.pt-head{background:#f6f7f7;border-bottom:1px solid #dcdcdc;font-weight:700;color:#1d2327;font-size:10px}
+.pt-row:last-child{border-bottom:none}
+.pt-row:hover{background:#fafafa}
+.pt-title-col{flex:1;min-width:0}
+.pt-title{font-weight:600;color:#2271b1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt-type{display:inline-block;font-size:9px;background:#f0f0f1;border-radius:3px;padding:1px 4px;color:#646970;margin-top:2px}
+.pt-score{width:70px;text-align:center;flex-shrink:0}
+.pt-mod{width:90px;color:#646970;font-size:10px;flex-shrink:0}
+.pt-date{width:70px;color:#646970;font-size:10px;flex-shrink:0}
 
-/* ─── CRON DIAGRAM ───────────────────────────── */
-.cron-diagram { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--paper-2); border-radius: var(--r-lg); overflow: hidden; background: var(--paper-2); }
-.cron-step { background: var(--white); padding: 20px 18px; position: relative; }
-.cron-step::after { content: "→"; position: absolute; right: -10px; top: 50%; transform: translateY(-50%); color: var(--ink-4); font-size: 16px; z-index: 1; }
-.cron-step:last-child::after { display: none; }
-.cron-step-num { font-family: var(--font-mono); font-size: 10px; color: var(--accent); margin-bottom: 8px; letter-spacing: .1em; }
-.cron-step h4  { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-.cron-step p   { font-size: 11px; color: var(--ink-3); line-height: 1.5; }
+/* ─────────────────────────────────────────────
+   CRON DIAGRAM
+───────────────────────────────────────────── */
+.cron-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--paper-2);border-radius:var(--r-lg);overflow:hidden;background:var(--paper-2);gap:1px}
+.cron-step{background:var(--white);padding:20px 16px}
+.cron-num{font-family:var(--font-mono);font-size:10px;color:var(--accent);margin-bottom:8px;letter-spacing:.1em}
+.cron-step h4{font-size:13px;font-weight:700;margin-bottom:4px}
+.cron-step p{font-size:11px;color:var(--ink-3);line-height:1.5}
+code{font-family:var(--font-mono);font-size:.9em;background:var(--paper-2);padding:1px 4px;border-radius:3px}
 
-/* ─── ARCH GRID ──────────────────────────────── */
-.arch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.arch-file { background: var(--white); border: 1px solid var(--paper-2); border-radius: var(--r-sm); padding: 13px 12px; transition: box-shadow .2s, border-color .2s; }
-.arch-file:hover { box-shadow: var(--shadow-md); border-color: #c3c4c7; }
-.arch-file-tag  { display: inline-block; font-size: 9px; font-family: var(--font-mono); letter-spacing: .06em; padding: 2px 6px; border-radius: 100px; margin-bottom: 6px; }
-.tag-core    { background: #fff4ed; color: var(--accent); }
-.tag-ui      { background: #f0fdf4; color: var(--green); }
-.tag-logic   { background: #fffbeb; color: var(--amber); }
-.tag-assets  { background: #f5f3ff; color: #7c3aed; }
-.arch-file-name { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; color: var(--ink); margin-bottom: 4px; word-break: break-word; }
-.arch-file-desc { font-size: 11px; color: var(--ink-3); line-height: 1.45; }
+/* ─────────────────────────────────────────────
+   ARCH GRID
+───────────────────────────────────────────── */
+.arch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.af{background:var(--white);border:1px solid var(--paper-2);border-radius:var(--r-sm);padding:12px;transition:box-shadow .2s,border-color .2s}
+.af:hover{box-shadow:var(--shadow-md);border-color:#c3c4c7}
+.af-tag{display:inline-block;font-size:9px;font-family:var(--font-mono);letter-spacing:.06em;padding:2px 6px;border-radius:100px;margin-bottom:6px}
+.t-core{background:#fff4ed;color:var(--accent)}
+.t-ui{background:#f0fdf4;color:var(--green)}
+.t-logic{background:#fffbeb;color:var(--amber)}
+.t-assets{background:#f5f3ff;color:#7c3aed}
+.af-name{font-family:var(--font-mono);font-size:10px;font-weight:500;color:var(--ink);margin-bottom:4px;word-break:break-all}
+.af-desc{font-size:11px;color:var(--ink-3);line-height:1.45}
 
-/* ─── PALETTE ─────────────────────────────────── */
-.palette-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.palette-swatch { border-radius: var(--r-md); padding: 16px; font-size: 13px; font-weight: 600; border-left: 4px solid transparent; position: relative; overflow: hidden; }
-.swatch-green  { background: var(--green-bg);  border-color: var(--green);  color: var(--green); }
-.swatch-amber  { background: var(--amber-bg);  border-color: var(--amber);  color: var(--amber); }
-.swatch-red    { background: var(--red-bg);     border-color: var(--red);    color: var(--red); }
-.swatch-label  { font-size: 11px; opacity: .7; margin-top: 4px; display: block; font-weight: 400; }
-.swatch-range  { font-family: var(--font-mono); font-size: 11px; margin-top: 2px; display: block; opacity: .8; }
+/* ─────────────────────────────────────────────
+   RISK LEVELS
+───────────────────────────────────────────── */
+.risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.risk-card{border-radius:var(--r-md);padding:18px;border-left:4px solid transparent}
+.risk-card.low{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.risk-card.med{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
+.risk-card.hi{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.risk-card strong{display:block;font-size:14px;margin-bottom:4px}
+.risk-card span{display:block;font-family:var(--font-mono);font-size:11px;opacity:.8;margin-bottom:6px}
+.risk-card p{font-size:12px;opacity:.75;font-weight:400;color:inherit}
 
-/* ─── CUSTOMIZATION ──────────────────────────── */
-.code-block { background: var(--ink); border-radius: var(--r-md); padding: 18px 20px; font-family: var(--font-mono); font-size: 12px; color: rgba(255,255,255,.75); line-height: 1.8; overflow-x: auto; }
-.code-block .kw  { color: #f7a25c; }
-.code-block .fn  { color: #93c5fd; }
-.code-block .str { color: #86efac; }
-.code-block .cm  { color: rgba(255,255,255,.3); }
-.code-block .num { color: #fbbf24; }
-.hooks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+/* ─────────────────────────────────────────────
+   CODE BLOCKS / HOOKS
+───────────────────────────────────────────── */
+.hooks-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hook-block{}
+.hook-label{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-4);margin-bottom:6px}
+.code{background:var(--ink);border-radius:var(--r-md);padding:16px 18px;font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,.72);line-height:1.8;overflow-x:auto}
+.kw{color:#f7a25c}.str{color:#86efac}.cm{color:rgba(255,255,255,.3)}.num{color:#fbbf24}
 
-/* ─── INSTALL ─────────────────────────────────── */
-.install-card { background: var(--ink); color: var(--white); border-radius: var(--r-lg); padding: clamp(24px,5vw,48px); display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; position: relative; overflow: hidden; }
-.install-card::before { content: ""; position: absolute; right: -60px; top: -60px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(201,80,10,.35) 0%, transparent 70%); pointer-events: none; }
-.install-card h2 { font-family: var(--font-serif); font-size: clamp(22px,4vw,32px); line-height: 1.1; margin-bottom: 10px; }
-.install-card p  { color: rgba(255,255,255,.55); font-size: 15px; margin-bottom: 16px; font-weight: 300; }
-.install-reqs    { font-size: 12px; color: rgba(255,255,255,.35); font-family: var(--font-mono); }
-.install-reqs span { margin-right: 12px; }
-.install-cta  { display: inline-flex; align-items: center; gap: 8px; background: var(--white); color: var(--ink); padding: 13px 22px; border-radius: var(--r-sm); font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: transform .15s, box-shadow .15s; position: relative; z-index: 1; }
-.install-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
-.install-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
-.install-link  { color: rgba(255,255,255,.5); font-size: 12px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.15); transition: color .15s; }
-.install-link:hover { color: rgba(255,255,255,.9); }
+/* ─────────────────────────────────────────────
+   FAQ
+───────────────────────────────────────────── */
+details{background:var(--white);border:1px solid var(--paper-2);border-radius:var(--r-md);margin-bottom:8px;overflow:hidden;transition:box-shadow .2s}
+details[open]{box-shadow:var(--shadow-sm)}
+summary{padding:14px 18px;font-size:14px;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;color:var(--ink-2);gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:20px;color:var(--ink-4);transition:transform .2s;flex-shrink:0}
+details[open] summary::after{transform:rotate(45deg)}
+details>p{padding:0 18px 14px;font-size:13px;color:var(--ink-3);line-height:1.65}
+details>p a{color:var(--accent);text-decoration:none}
+details>p a:hover{text-decoration:underline}
 
-/* ─── FAQ ─────────────────────────────────────── */
-details { background: var(--white); border: 1px solid var(--paper-2); border-radius: var(--r-md); margin-bottom: 8px; overflow: hidden; transition: box-shadow .2s; }
-details[open] { box-shadow: var(--shadow-sm); }
-summary { padding: 14px 18px; font-size: 14px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; color: var(--ink-2); }
-summary::-webkit-details-marker { display: none; }
-summary::after { content: "+"; font-size: 20px; color: var(--ink-4); transition: transform .2s; }
-details[open] summary::after { transform: rotate(45deg); }
-details > p { padding: 0 18px 14px; font-size: 13px; color: var(--ink-3); line-height: 1.65; }
-details > p a { color: var(--accent); text-decoration: none; }
-details > p a:hover { text-decoration: underline; }
+/* ─────────────────────────────────────────────
+   INSTALL
+───────────────────────────────────────────── */
+.install-card{background:var(--ink);color:var(--white);border-radius:var(--r-lg);padding:clamp(24px,5vw,48px);display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;position:relative;overflow:hidden}
+.install-card::before{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(201,80,10,.35) 0%,transparent 70%);pointer-events:none}
+.install-card h2{font-family:var(--font-serif);font-size:clamp(22px,4vw,32px);line-height:1.1;margin-bottom:10px}
+.install-card>div>p{color:rgba(255,255,255,.55);font-size:15px;margin-bottom:14px;font-weight:300}
+.install-reqs{font-size:11px;color:rgba(255,255,255,.3);font-family:var(--font-mono);display:flex;flex-wrap:wrap;gap:8px 14px}
+.install-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+.install-link{color:rgba(255,255,255,.5);font-size:12px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.15);transition:color .15s}
+.install-link:hover{color:rgba(255,255,255,.9)}
+.install-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--white);color:var(--ink);padding:13px 22px;border-radius:var(--r-sm);font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap;transition:transform .15s,box-shadow .15s;position:relative;z-index:1}
+.install-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
 
-/* ─── FOOTER ──────────────────────────────────── */
-.footer { background: var(--ink); color: rgba(255,255,255,.35); padding: 24px 20px; text-align: center; font-size: 12px; }
-.footer a { color: rgba(255,255,255,.55); text-decoration: none; }
-.footer a:hover { color: #fff; }
+/* ─────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────── */
+.footer{background:var(--ink);color:rgba(255,255,255,.35);padding:24px clamp(16px,5vw,32px);text-align:center;font-size:12px}
+.footer a{color:rgba(255,255,255,.5);text-decoration:none}
+.footer a:hover{color:#fff}
 
-/* ═══════════════════════════════════
-   RESPONSIVE — TABLET ≤ 900px
-═══════════════════════════════════ */
-@media (max-width: 900px) {
-    .features-grid  { grid-template-columns: repeat(2, 1fr); }
-    .score-hero     { grid-template-columns: 1fr 1fr 1fr; }
-    .cron-diagram   { grid-template-columns: 1fr 1fr; }
-    .cron-step::after { display: none; }
-    .arch-grid      { grid-template-columns: repeat(2, 1fr); }
-    .hooks-grid     { grid-template-columns: 1fr; }
-    .install-card   { grid-template-columns: 1fr; }
-    .install-cta    { width: 100%; justify-content: center; }
-    .dt-head, .dt-row { grid-template-columns: 2fr 70px 80px; }
-    .dt-head > *:nth-child(n+4), .dt-row > *:nth-child(n+4) { display: none; }
-    .sm-row   { grid-template-columns: 2fr 1fr; }
-    .sm-row > *:nth-child(3) { display: none; }
-    .sm-head > *:nth-child(3) { display: none; }
+/* ─────────────────────────────────────────────
+   RESPONSIVE — TABLET ≤ 768px
+───────────────────────────────────────────── */
+@media(max-width:768px){
+  /* Features: 2 cols */
+  .features{grid-template-columns:repeat(2,1fr)}
+  /* Score cards: 1 col stacked */
+  .score-cards{grid-template-columns:1fr}
+  /* Arch: 2 cols */
+  .arch-grid{grid-template-columns:repeat(2,1fr)}
+  /* Cron: 2 cols */
+  .cron-grid{grid-template-columns:repeat(2,1fr)}
+  /* Risk: 1 col */
+  .risk-grid{grid-template-columns:1fr}
+  /* Hooks: 1 col */
+  .hooks-grid{grid-template-columns:1fr}
+  /* Install: stack */
+  .install-card{grid-template-columns:1fr}
+  .install-cta{width:100%;text-align:center}
+  /* Admin sidebar: hide on narrow */
+  .mock-sb{display:none}
+  /* Posts list: hide last cols */
+  .pt-mod,.pt-date{display:none}
+  /* Dashboard table: hide date col */
+  .dt-date{display:none}
 }
 
-@media (max-width: 600px) {
-    .features-grid  { grid-template-columns: 1fr; }
-    .score-hero     { grid-template-columns: 1fr; }
-    .palette-row    { grid-template-columns: 1fr; }
-    .arch-grid      { grid-template-columns: 1fr; }
-    .cron-diagram   { grid-template-columns: 1fr; }
-    .tm-header-row, .tm-row { grid-template-columns: 2fr 70px; }
-    .tm-header-row > *:nth-child(n+3), .tm-row > *:nth-child(n+3) { display: none; }
-    .admin-sidebar  { display: none; }
-    .dt-head, .dt-row { grid-template-columns: 2fr 70px; }
-    .dt-head > *:nth-child(n+3), .dt-row > *:nth-child(n+3) { display: none; }
+/* ─────────────────────────────────────────────
+   RESPONSIVE — MOBILE ≤ 480px
+───────────────────────────────────────────── */
+@media(max-width:480px){
+  /* Features: 1 col */
+  .features{grid-template-columns:1fr}
+  /* Arch: 1 col */
+  .arch-grid{grid-template-columns:1fr}
+  /* Cron: 1 col */
+  .cron-grid{grid-template-columns:1fr}
+  /* Hero H1: no forced break */
+  .hero h1 br{display:none}
+  /* Dashboard: title + score only */
+  .dt-risk,.dt-action,.dt-date{display:none}
+  /* Posts list: title + score only */
+  .pt-score,.pt-mod,.pt-date{display:none}
+  /* Ensure posts table doesn't overflow */
+  .posts-mockup{overflow-x:hidden}
+  /* Summary font size */
+  summary{font-size:13px;padding:12px 14px}
+  details>p{padding:0 14px 12px;font-size:12px}
+  /* Code blocks */
+  .code{font-size:10px;padding:12px 14px}
+  /* Hero badges wrap */
+  .badge{font-size:11px;padding:4px 10px}
+  /* Mock heading: stack */
+  .mock-heading{flex-direction:column;align-items:flex-start}
+  .mock-btn{width:100%;text-align:center}
 }
-    </style>
+</style>
 </head>
 <body>
 
-<!-- ═══ HERO ═══════════════════════════════════════════════════ -->
+<!-- ═══ BURGER NAV ══ -->
+<nav class="burger-nav" id="burgerNav">
+  <div class="burger-bar">
+    <div class="burger-brand"><strong>CDM</strong> &nbsp;·&nbsp; Content Decay Monitor</div>
+    <button class="burger-btn" id="burgerBtn" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="burger-drop" id="burgerDrop">
+    <a href="#features"     onclick="closeMenu()"><span class="ico">✨</span>Features</a>
+    <a href="#scoring"      onclick="closeMenu()"><span class="ico">📐</span>How Scoring Works</a>
+    <a href="#dashboard"    onclick="closeMenu()"><span class="ico">📊</span>Admin Dashboard</a>
+    <a href="#posts-list"   onclick="closeMenu()"><span class="ico">🏷️</span>Posts List Column</a>
+    <a href="#cron"         onclick="closeMenu()"><span class="ico">⏰</span>WP-Cron</a>
+    <a href="#architecture" onclick="closeMenu()"><span class="ico">🏗️</span>Architecture</a>
+    <a href="#faq"          onclick="closeMenu()"><span class="ico">💬</span>FAQ</a>
+    <a href="#install"      onclick="closeMenu()"><span class="ico">📥</span>Install</a>
+  </div>
+</nav>
+<script>
+(function(){
+  var nav=document.getElementById('burgerNav');
+  var btn=document.getElementById('burgerBtn');
+  btn.addEventListener('click',function(){
+    var open=nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded',open);
+  });
+  window.closeMenu=function(){
+    nav.classList.remove('open');
+    btn.setAttribute('aria-expanded','false');
+  };
+  document.addEventListener('click',function(e){
+    if(!nav.contains(e.target))closeMenu();
+  });
+})();
+</script>
+
+<!-- ═══ HERO ══ -->
 <header class="hero">
-    <div class="hero-inner container">
-        <div class="hero-eyebrow"><span></span>WordPress Plugin · Open Source · No APIs</div>
-        <h1>Content Decay Monitor<br><em>Find your stale posts before Google does</em></h1>
-        <p class="hero-sub">Scans every published post and returns a Content Freshness Score (0–100) based on publish age, modification date, stale year references, word count, and internal linking.</p>
-        <div class="hero-badges">
-            <span class="badge badge-filled">v1.0.0</span>
-            <span class="badge badge-outline">WordPress 6.5+</span>
-            <span class="badge badge-outline">PHP 7.4+</span>
-            <span class="badge badge-green">✓ Admin-Only</span>
-            <span class="badge badge-outline">GPL v2</span>
-        </div>
-        <div class="score-hero">
-            <div class="score-card">
-                <div class="score-card-label">Freshness score</div>
-                <div class="score-card-num green">91</div>
-                <div class="score-card-post">Getting Started Guide</div>
-                <span class="score-card-risk risk-low">Low Risk</span>
-            </div>
-            <div class="score-card">
-                <div class="score-card-label">Freshness score</div>
-                <div class="score-card-num amber">58</div>
-                <div class="score-card-post">10 SEO Tips for 2021</div>
-                <span class="score-card-risk risk-medium">Medium Risk</span>
-            </div>
-            <div class="score-card">
-                <div class="score-card-label">Freshness score</div>
-                <div class="score-card-num red">22</div>
-                <div class="score-card-post">Best Tools of 2019</div>
-                <span class="score-card-risk risk-high">High Risk</span>
-            </div>
-        </div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span></span>WordPress Plugin · Open Source · No APIs</div>
+    <h1>Content Decay Monitor<br><em>Find stale posts before Google does</em></h1>
+    <p class="hero-sub">Scans every published post and returns a Content Freshness Score (0–100) based on publish age, modification date, stale year references, word count, and internal linking.</p>
+    <div class="hero-badges">
+      <span class="badge badge-filled">v1.0.0</span>
+      <span class="badge badge-outline">WordPress 6.5+</span>
+      <span class="badge badge-outline">PHP 7.4+</span>
+      <span class="badge badge-green">✓ Admin-Only</span>
+      <span class="badge badge-outline">GPL v2</span>
     </div>
+    <div class="score-cards">
+      <div class="sc">
+        <div class="sc-lbl">Freshness score</div>
+        <div class="sc-num g">91</div>
+        <div class="sc-post">Getting Started Guide</div>
+        <span class="sc-risk rl">Low Risk</span>
+      </div>
+      <div class="sc">
+        <div class="sc-lbl">Freshness score</div>
+        <div class="sc-num a">58</div>
+        <div class="sc-post">10 SEO Tips for 2021</div>
+        <span class="sc-risk rm">Medium Risk</span>
+      </div>
+      <div class="sc">
+        <div class="sc-lbl">Freshness score</div>
+        <div class="sc-num r">22</div>
+        <div class="sc-post">Best Tools of 2019</div>
+        <span class="sc-risk rh">High Risk</span>
+      </div>
+    </div>
+  </div>
 </header>
 
-<!-- ═══ FEATURES ════════════════════════════════════════════════ -->
-<section class="section">
-    <div class="container">
-        <div class="section-label">What's included</div>
-        <h2 class="section-title">Everything you need to fight content decay</h2>
-        <p class="section-desc">Five decay signals, one score, zero external dependencies. Works on any WordPress site out of the box.</p>
-        <div class="features-grid">
-            <div class="feature-item">
-                <span class="feature-icon">🔢</span>
-                <h3>Content Freshness Score</h3>
-                <p>Every post gets a 0–100 integer score. Lower score = higher decay risk. Recalculates on every scan.</p>
-            </div>
-            <div class="feature-item">
-                <span class="feature-icon">📅</span>
-                <h3>Publish &amp; Modified Age</h3>
-                <p>Detects posts older than your configured threshold (default 12 months) and deducts points proportionally.</p>
-            </div>
-            <div class="feature-item">
-                <span class="feature-icon">🗓️</span>
-                <h3>Stale Year Detection</h3>
-                <p>Regex scans content for year references from 2018–2023. A flat 20-point deduction for any match found.</p>
-            </div>
-            <div class="feature-item">
-                <span class="feature-icon">📖</span>
-                <h3>Word Count Penalty</h3>
-                <p>Posts below your minimum word count (default 300) are penalised linearly — thin content = lower score.</p>
-            </div>
-            <div class="feature-item">
-                <span class="feature-icon">🔗</span>
-                <h3>Internal Link Check</h3>
-                <p>Posts with zero internal links (same domain) receive a 15-point penalty. Encourage interconnected content.</p>
-            </div>
-            <div class="feature-item">
-                <span class="feature-icon">📊</span>
-                <h3>Admin Dashboard</h3>
-                <p>Sortable table of all scanned posts under Tools → Content Decay. Score, risk level, last scan time.</p>
-            </div>
-            <div class="feature-item">
-                <span class="feature-icon">🏷️</span>
-                <h3>Posts List Column</h3>
-                <p>Colour-coded Freshness badge on every row. Click the column header to sort by score ascending.</p>
-            </div>
-            <div class="feature-item">
-                <span class="feature-icon">⚡</span>
-                <h3>AJAX Scan Triggers</h3>
-                <p>Run a full scan or re-scan a single post without page reload. Progress shown inline.</p>
-            </div>
-            <div class="feature-item">
-                <span class="feature-icon">⏰</span>
-                <h3>Daily WP-Cron</h3>
-                <p>Automatic background scans in configurable batch chunks. Resumes from offset so large sites stay covered.</p>
-            </div>
-        </div>
+<!-- ═══ FEATURES ══ -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <div class="label">What's included</div>
+    <h2 class="title">Everything you need to fight content decay</h2>
+    <p class="desc">Five decay signals, one score, zero external dependencies.</p>
+    <div class="features">
+      <div class="fi"><div class="fi-icon">🔢</div><h3>Freshness Score (0–100)</h3><p>Every post gets a score. Lower = higher decay risk. Recalculates on every scan.</p></div>
+      <div class="fi"><div class="fi-icon">📅</div><h3>Publish &amp; Modified Age</h3><p>Detects posts older than your threshold (default 12 months) and deducts points proportionally.</p></div>
+      <div class="fi"><div class="fi-icon">🗓️</div><h3>Stale Year Detection</h3><p>Regex scans content for year references 2018–2023. Flat 20-point deduction per match.</p></div>
+      <div class="fi"><div class="fi-icon">📖</div><h3>Word Count Penalty</h3><p>Posts below your minimum word count are penalised linearly — thin content = lower score.</p></div>
+      <div class="fi"><div class="fi-icon">🔗</div><h3>Internal Link Check</h3><p>Posts with zero internal links receive a 15-point penalty. Encourages interconnected content.</p></div>
+      <div class="fi"><div class="fi-icon">📊</div><h3>Admin Dashboard</h3><p>Sortable table under Tools → Content Decay showing score, risk, and last scan time.</p></div>
+      <div class="fi"><div class="fi-icon">🏷️</div><h3>Posts List Column</h3><p>Colour-coded Freshness badge on every row, sortable by score ascending.</p></div>
+      <div class="fi"><div class="fi-icon">⚡</div><h3>AJAX Scan Triggers</h3><p>Full scan or single-post re-scan without page reload. Progress shown inline.</p></div>
+      <div class="fi"><div class="fi-icon">⏰</div><h3>Daily WP-Cron</h3><p>Background scans in configurable batch chunks. Resumes from offset so large sites stay covered.</p></div>
     </div>
+  </div>
 </section>
 
-<!-- ═══ SCORE MODEL ══════════════════════════════════════════════ -->
+<!-- ═══ SCORE MODEL ══ -->
+<section class="section section-alt" id="scoring">
+  <div class="section-inner">
+    <div class="label">Scoring model</div>
+    <h2 class="title">Five weighted signals, one actionable number</h2>
+    <p class="desc">Every post starts at 100. Deductions are applied independently and clamped to 0–100.</p>
+    <div class="score-model">
+      <div class="sm-hdr">
+        <span class="sm-hdr-title">STARTING SCORE</span>
+        <span class="sm-hdr-num">100</span>
+      </div>
+      <div class="sm-row sm-head">
+        <div>Signal</div>
+        <div style="text-align:right">Max deduction</div>
+      </div>
+      <div class="sm-row">
+        <div class="sm-signal">📅 Publish age over threshold<small>Linear ramp from threshold → 2× threshold</small></div>
+        <div class="sm-pts">−30 pts</div>
+      </div>
+      <div class="sm-row">
+        <div class="sm-signal">✏️ Modified age over threshold<small>Same linear ramp, separate threshold setting</small></div>
+        <div class="sm-pts">−20 pts</div>
+      </div>
+      <div class="sm-row">
+        <div class="sm-signal">🗓️ Stale year in content<small>Any match of 2018–2023 triggers flat penalty</small></div>
+        <div class="sm-pts">−20 pts</div>
+      </div>
+      <div class="sm-row">
+        <div class="sm-signal">📖 Word count below minimum<small>Linear from minimum down to 0 words</small></div>
+        <div class="sm-pts">−15 pts</div>
+      </div>
+      <div class="sm-row">
+        <div class="sm-signal">🔗 Zero internal links<small>Flat penalty — no links to same-domain pages found</small></div>
+        <div class="sm-pts">−15 pts</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ADMIN DASHBOARD ══ -->
+<section class="section" id="dashboard">
+  <div class="section-inner">
+    <div class="label">Admin dashboard</div>
+    <h2 class="title">Full-site freshness report under Tools</h2>
+    <p class="desc">One click to scan all posts. Sort by score to see your highest-decay content instantly.</p>
+    <div class="mockup-wrap">
+      <div class="mock-chrome">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#ffbd2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+        <div class="mock-url">yoursite.com/wp-admin/tools.php?page=content-decay-monitor</div>
+      </div>
+      <div class="mock-layout">
+        <div class="mock-sb">
+          <div class="mock-sb-item">🏠 Dashboard</div>
+          <div class="mock-sb-item">📝 Posts</div>
+          <div class="mock-sb-sep"></div>
+          <div class="mock-sb-item">🔧 Tools</div>
+          <div class="mock-sb-item on" style="font-size:9px">📉 Content Decay</div>
+          <div class="mock-sb-sep"></div>
+          <div class="mock-sb-item">⚙️ Settings</div>
+        </div>
+        <div class="mock-body">
+          <div class="mock-heading">
+            📉 Content Decay Monitor
+            <button class="mock-btn">▶ Run Scan</button>
+          </div>
+          <div class="mock-note">Scanned <strong>47</strong> of <strong>52</strong> published posts.</div>
+          <div class="dt">
+            <div class="dt-head">
+              <div class="dt-title">Post Title</div>
+              <div class="dt-score">Score ↑</div>
+              <div class="dt-risk">Risk</div>
+              <div class="dt-date">Last Scan</div>
+              <div class="dt-action">Action</div>
+            </div>
+            <div class="dt-row">
+              <div class="dt-title">Best Marketing Tools of 2019</div>
+              <div class="dt-score"><span class="badge-score br">17</span></div>
+              <div class="dt-risk"><span class="risk-pill hi">High</span></div>
+              <div class="dt-date">Today</div>
+              <div class="dt-action"><button class="dt-btn">Re-scan</button></div>
+            </div>
+            <div class="dt-row">
+              <div class="dt-title">Remote Work Guide 2021</div>
+              <div class="dt-score"><span class="badge-score br">31</span></div>
+              <div class="dt-risk"><span class="risk-pill hi">High</span></div>
+              <div class="dt-date">Today</div>
+              <div class="dt-action"><button class="dt-btn">Re-scan</button></div>
+            </div>
+            <div class="dt-row">
+              <div class="dt-title">SEO Fundamentals Update</div>
+              <div class="dt-score"><span class="badge-score ba">62</span></div>
+              <div class="dt-risk"><span class="risk-pill me">Medium</span></div>
+              <div class="dt-date">Today</div>
+              <div class="dt-action"><button class="dt-btn">Re-scan</button></div>
+            </div>
+            <div class="dt-row">
+              <div class="dt-title">Getting Started with WordPress</div>
+              <div class="dt-score"><span class="badge-score bg">91</span></div>
+              <div class="dt-risk"><span class="risk-pill lo">Low</span></div>
+              <div class="dt-date">Today</div>
+              <div class="dt-action"><button class="dt-btn">Re-scan</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ POSTS LIST ══ -->
+<section class="section section-alt" id="posts-list">
+  <div class="section-inner">
+    <div class="label">Posts list column</div>
+    <h2 class="title">Freshness badge at a glance — sortable</h2>
+    <p class="desc">A colour-coded badge appears on every row. Click the column header to sort by score.</p>
+    <div class="posts-mockup">
+      <div class="pt-head">
+        <div class="pt-title-col">Title</div>
+        <div class="pt-score">Freshness ↑</div>
+        <div class="pt-mod">Last Modified</div>
+        <div class="pt-date">Published</div>
+      </div>
+      <div class="pt-row">
+        <div class="pt-title-col"><div class="pt-title">Best Marketing Tools of 2019</div><span class="pt-type">post</span></div>
+        <div class="pt-score"><span class="badge-score br">17</span></div>
+        <div class="pt-mod">3 years ago</div>
+        <div class="pt-date">Aug 2019</div>
+      </div>
+      <div class="pt-row">
+        <div class="pt-title-col"><div class="pt-title">Remote Work Guide 2021</div><span class="pt-type">post</span></div>
+        <div class="pt-score"><span class="badge-score br">31</span></div>
+        <div class="pt-mod">14 months ago</div>
+        <div class="pt-date">Dec 2021</div>
+      </div>
+      <div class="pt-row">
+        <div class="pt-title-col"><div class="pt-title">SEO Fundamentals Update</div><span class="pt-type">post</span></div>
+        <div class="pt-score"><span class="badge-score ba">62</span></div>
+        <div class="pt-mod">7 months ago</div>
+        <div class="pt-date">Jul 2023</div>
+      </div>
+      <div class="pt-row">
+        <div class="pt-title-col"><div class="pt-title">Getting Started with WordPress</div><span class="pt-type">post</span></div>
+        <div class="pt-score"><span class="badge-score bg">91</span></div>
+        <div class="pt-mod">2 months ago</div>
+        <div class="pt-date">Nov 2024</div>
+      </div>
+      <div class="pt-row">
+        <div class="pt-title-col"><div class="pt-title">Privacy Policy</div><span class="pt-type">page</span></div>
+        <div class="pt-score"><span class="badge-score bna">—</span></div>
+        <div class="pt-mod">—</div>
+        <div class="pt-date">Jan 2020</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ RISK LEVELS ══ -->
+<section class="section">
+  <div class="section-inner">
+    <div class="label">Risk levels</div>
+    <h2 class="title">Three clear tiers, zero guesswork</h2>
+    <p class="desc">Score thresholds translate directly into a recommended action.</p>
+    <div class="risk-grid">
+      <div class="risk-card low">
+        <strong>🟢 Low Risk</strong>
+        <span>Score 80–100</span>
+        <p>Content is fresh. Monitor quarterly.</p>
+      </div>
+      <div class="risk-card med">
+        <strong>🟠 Medium Risk</strong>
+        <span>Score 50–79</span>
+        <p>Review and consider updating within 30 days.</p>
+      </div>
+      <div class="risk-card hi">
+        <strong>🔴 High Risk</strong>
+        <span>Score 0–49</span>
+        <p>Prioritise for immediate refresh or consolidation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CRON ══ -->
+<section class="section section-alt" id="cron">
+  <div class="section-inner">
+    <div class="label">WP-Cron automation</div>
+    <h2 class="title">Daily background scans — no manual work</h2>
+    <p class="desc">A transient-based offset lets each daily cron fire advance the scan window safely across large sites.</p>
+    <div class="cron-grid">
+      <div class="cron-step">
+        <div class="cron-num">STEP 01</div>
+        <h4>Plugin Activates</h4>
+        <p>Registers <code>cdm_daily_scan</code> WP-Cron event on activation.</p>
+      </div>
+      <div class="cron-step">
+        <div class="cron-num">STEP 02</div>
+        <h4>Cron Fires</h4>
+        <p>Once per day, retrieves the stored transient offset (defaults to 0 for a fresh cycle).</p>
+      </div>
+      <div class="cron-step">
+        <div class="cron-num">STEP 03</div>
+        <h4>Batch Scanned</h4>
+        <p>Scans up to 20 posts (configurable). Updates <code>_cdm_score</code> meta on each.</p>
+      </div>
+      <div class="cron-step">
+        <div class="cron-num">STEP 04</div>
+        <h4>Offset Advances</h4>
+        <p>Saves new offset to transient. Next fire resumes from there, resets when all posts are done.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ARCHITECTURE ══ -->
+<section class="section" id="architecture">
+  <div class="section-inner">
+    <div class="label">Plugin architecture</div>
+    <h2 class="title">Six focused classes, one responsibility each</h2>
+    <p class="desc">Object-oriented, WordPress Coding Standards compliant, easy to extend.</p>
+    <div class="arch-grid">
+      <div class="af"><div class="af-tag t-core">core</div><div class="af-name">content-decay-monitor.php</div><div class="af-desc">Bootstrap, constants, activation &amp; deactivation hooks, singleton loader</div></div>
+      <div class="af"><div class="af-tag t-logic">logic</div><div class="af-name">class-cdm-helpers.php</div><div class="af-desc">Stateless utilities — word count, link count, regex, date math, label mapping</div></div>
+      <div class="af"><div class="af-tag t-logic">logic</div><div class="af-name">class-cdm-score.php</div><div class="af-desc">Pure scoring logic with weighted deductions. No I/O — easily unit-testable</div></div>
+      <div class="af"><div class="af-tag t-logic">logic</div><div class="af-name">class-cdm-scanner.php</div><div class="af-desc">Batch post fetching with fields=ids, signal gathering, meta persistence</div></div>
+      <div class="af"><div class="af-tag t-ui">ui</div><div class="af-name">class-cdm-admin.php</div><div class="af-desc">Tools submenu, dashboard table, settings form, three AJAX handlers</div></div>
+      <div class="af"><div class="af-tag t-ui">ui</div><div class="af-name">class-cdm-columns.php</div><div class="af-desc">Posts list column, colour badge, sort query handler</div></div>
+      <div class="af"><div class="af-tag t-logic">logic</div><div class="af-name">class-cdm-cron.php</div><div class="af-desc">WP-Cron event, transient-based offset, batch resumption across fires</div></div>
+      <div class="af"><div class="af-tag t-assets">assets</div><div class="af-name">assets/admin.css</div><div class="af-desc">Badge colours, table layout, settings panel. Enqueued on plugin page only</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CUSTOMIZATION ══ -->
 <section class="section section-alt">
-    <div class="container">
-        <div class="section-label">Scoring model</div>
-        <h2 class="section-title">Five weighted signals, one actionable number</h2>
-        <p class="section-desc">Every post starts at 100. Deductions are applied independently and the final score is clamped to 0–100.</p>
-        <div class="score-model">
-            <div class="sm-header">
-                <span class="sm-header-title">STARTING SCORE</span>
-                <span class="sm-header-score">100</span>
-            </div>
-            <div class="sm-row sm-head">
-                <div class="sm-col-head">Signal</div>
-                <div class="sm-col-head" style="text-align:center;">Max −pts</div>
-                <div class="sm-col-head">Logic</div>
-            </div>
-            <div class="sm-row">
-                <div class="sm-signal">📅 Publish age over threshold</div>
-                <div class="sm-deduction">−30</div>
-                <div>
-                    <div class="sm-bar-wrap"><div class="sm-bar"><div class="sm-bar-fill" style="width:100%;"></div></div><span style="font-size:10px;color:var(--ink-4);white-space:nowrap;">max</span></div>
-                    <div class="sm-logic">Linear ramp from threshold → 2× threshold</div>
-                </div>
-            </div>
-            <div class="sm-row">
-                <div class="sm-signal">✏️ Modified age over threshold</div>
-                <div class="sm-deduction">−20</div>
-                <div>
-                    <div class="sm-bar-wrap"><div class="sm-bar"><div class="sm-bar-fill" style="width:67%;"></div></div></div>
-                    <div class="sm-logic">Same linear ramp, separate threshold</div>
-                </div>
-            </div>
-            <div class="sm-row">
-                <div class="sm-signal">🗓️ Stale year in content</div>
-                <div class="sm-deduction">−20</div>
-                <div>
-                    <div class="sm-bar-wrap"><div class="sm-bar"><div class="sm-bar-fill" style="width:67%;"></div></div></div>
-                    <div class="sm-logic">Flat penalty — any match of 2018–2023</div>
-                </div>
-            </div>
-            <div class="sm-row">
-                <div class="sm-signal">📖 Word count below minimum</div>
-                <div class="sm-deduction">−15</div>
-                <div>
-                    <div class="sm-bar-wrap"><div class="sm-bar"><div class="sm-bar-fill" style="width:50%;"></div></div></div>
-                    <div class="sm-logic">Linear from minimum down to 0 words</div>
-                </div>
-            </div>
-            <div class="sm-row">
-                <div class="sm-signal">🔗 Zero internal links</div>
-                <div class="sm-deduction">−15</div>
-                <div>
-                    <div class="sm-bar-wrap"><div class="sm-bar"><div class="sm-bar-fill" style="width:50%;"></div></div></div>
-                    <div class="sm-logic">Flat penalty — 0 internal links found</div>
-                </div>
-            </div>
-        </div>
+  <div class="section-inner">
+    <div class="label">Customization</div>
+    <h2 class="title">Extend with filters &amp; action hooks</h2>
+    <p class="desc">Add custom post types, widen the stale year range, or react to scan events from your theme or mu-plugin.</p>
+    <div class="hooks-grid">
+      <div class="hook-block">
+        <div class="hook-label">Add Custom Post Types</div>
+        <div class="code"><span class="kw">add_filter</span>( <span class="str">'cdm_post_types'</span>, <span class="kw">function</span>( $types ) {<br>&nbsp;&nbsp;$types[] = <span class="str">'product'</span>; <span class="cm">// WooCommerce</span><br>&nbsp;&nbsp;$types[] = <span class="str">'event'</span>;<br>&nbsp;&nbsp;<span class="kw">return</span> $types;<br>} );</div>
+      </div>
+      <div class="hook-block">
+        <div class="hook-label">Widen the Stale Year Range</div>
+        <div class="code"><span class="kw">add_filter</span>( <span class="str">'cdm_stale_year_pattern'</span>, <span class="kw">function</span>() {<br>&nbsp;&nbsp;<span class="cm">// Catch 2015–2024</span><br>&nbsp;&nbsp;<span class="kw">return</span> <span class="str">'/\b(201[5-9]|202[0-4])\b/'</span>;<br>} );</div>
+      </div>
+      <div class="hook-block">
+        <div class="hook-label">Hook Into Single Post Scan</div>
+        <div class="code"><span class="kw">add_action</span>( <span class="str">'cdm_post_scanned'</span>,<br>&nbsp;&nbsp;<span class="kw">function</span>( $post_id, $score, $signals ) {<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// log, alert, push to analytics…</span><br>}, <span class="num">10</span>, <span class="num">3</span> );</div>
+      </div>
+      <div class="hook-block">
+        <div class="hook-label">Hook Into Batch Complete</div>
+        <div class="code"><span class="kw">add_action</span>( <span class="str">'cdm_batch_complete'</span>,<br>&nbsp;&nbsp;<span class="kw">function</span>( $count, $offset ) {<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// Send Slack summary, etc.</span><br>}, <span class="num">10</span>, <span class="num">2</span> );</div>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- ═══ ADMIN DASHBOARD MOCKUP ══════════════════════════════════ -->
-<section class="section">
-    <div class="container">
-        <div class="section-label">Admin dashboard</div>
-        <h2 class="section-title">Full-site freshness report under Tools</h2>
-        <p class="section-desc">One click to scan all posts. Sort by score to see your highest-decay content instantly. Re-scan any single post inline.</p>
-        <div class="admin-mockup">
-            <div class="browser-chrome">
-                <div class="bc-dot bc-red"></div><div class="bc-dot bc-yellow"></div><div class="bc-dot bc-green"></div>
-                <div class="bc-url">yoursite.com/wp-admin/tools.php?page=content-decay-monitor</div>
-            </div>
-            <div class="admin-layout">
-                <div class="admin-sidebar">
-                    <div class="admin-menu-item">🏠 Dashboard</div>
-                    <div class="admin-menu-item">📝 Posts</div>
-                    <div class="admin-menu-item">📄 Pages</div>
-                    <div class="admin-menu-sep"></div>
-                    <div class="admin-menu-item">🔧 Tools</div>
-                    <div class="admin-menu-item active" style="font-size:10px;padding-left:18px;">📉 Content Decay</div>
-                    <div class="admin-menu-sep"></div>
-                    <div class="admin-menu-item">⚙️ Settings</div>
-                </div>
-                <div class="admin-body">
-                    <div class="admin-heading">
-                        📉 Content Decay Monitor
-                        <button class="admin-run-btn">▶ Run Scan</button>
-                    </div>
-                    <div style="font-size:11px;color:#646970;margin-bottom:10px;">Scanned <strong>47</strong> of <strong>52</strong> published posts.</div>
-                    <div class="dash-table">
-                        <div class="dt-head">
-                            <div>Post Title</div>
-                            <div style="text-align:center;">Score ↑</div>
-                            <div>Risk Level</div>
-                            <div>Last Scan</div>
-                            <div>Actions</div>
-                        </div>
-                        <div class="dt-row">
-                            <div class="dt-title">Best Marketing Tools of 2019</div>
-                            <div style="text-align:center;"><span class="cdm-badge cdm-red">17</span></div>
-                            <div><span class="risk-badge high">High</span></div>
-                            <div style="font-size:10px;color:#646970;">Today 09:12</div>
-                            <div style="display:flex;gap:4px;"><span style="font-size:10px;border:1px solid #c3c4c7;padding:2px 6px;border-radius:3px;cursor:pointer;">Re-scan</span></div>
-                        </div>
-                        <div class="dt-row">
-                            <div class="dt-title">Complete Guide to Remote Work in 2021</div>
-                            <div style="text-align:center;"><span class="cdm-badge cdm-red">31</span></div>
-                            <div><span class="risk-badge high">High</span></div>
-                            <div style="font-size:10px;color:#646970;">Today 09:12</div>
-                            <div style="display:flex;gap:4px;"><span style="font-size:10px;border:1px solid #c3c4c7;padding:2px 6px;border-radius:3px;cursor:pointer;">Re-scan</span></div>
-                        </div>
-                        <div class="dt-row">
-                            <div class="dt-title">SEO Fundamentals: What Changed</div>
-                            <div style="text-align:center;"><span class="cdm-badge cdm-amber">62</span></div>
-                            <div><span class="risk-badge medium">Medium</span></div>
-                            <div style="font-size:10px;color:#646970;">Today 09:11</div>
-                            <div style="display:flex;gap:4px;"><span style="font-size:10px;border:1px solid #c3c4c7;padding:2px 6px;border-radius:3px;cursor:pointer;">Re-scan</span></div>
-                        </div>
-                        <div class="dt-row">
-                            <div class="dt-title">Getting Started with WordPress</div>
-                            <div style="text-align:center;"><span class="cdm-badge cdm-green">91</span></div>
-                            <div><span class="risk-badge low">Low</span></div>
-                            <div style="font-size:10px;color:#646970;">Today 09:11</div>
-                            <div style="display:flex;gap:4px;"><span style="font-size:10px;border:1px solid #c3c4c7;padding:2px 6px;border-radius:3px;cursor:pointer;">Re-scan</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- ═══ FAQ ══ -->
+<section class="section" id="faq">
+  <div class="section-inner">
+    <div class="label">FAQ</div>
+    <h2 class="title">Frequently asked questions</h2>
+    <p class="desc" style="margin-bottom:20px">Quick answers about Content Decay Monitor.</p>
+    <details open>
+      <summary>Does scanning affect site performance?</summary>
+      <p>No. Scans run manually via AJAX or via the background WP-Cron job. The scanner uses <code>fields=ids</code> queries — no full post objects loaded unnecessarily. Results are cached in post meta, so no computation happens on the front end or on page load.</p>
+    </details>
+    <details>
+      <summary>Can I scan custom post types beyond "post"?</summary>
+      <p>Yes — use the <code>cdm_post_types</code> filter. See the Customization section above for an example.</p>
+    </details>
+    <details>
+      <summary>What happens if I have thousands of posts?</summary>
+      <p>The daily WP-Cron job scans in batches (default 20) and stores its offset in a transient. Each daily fire advances the window until all posts are covered, then the cycle resets — no timeouts, no memory pressure.</p>
+    </details>
+    <details>
+      <summary>Where is the score data stored?</summary>
+      <p>Standard post meta under <code>_cdm_score</code> (integer 0–100) and <code>_cdm_last_scan</code> (UTC datetime). No custom tables. Removed on uninstall.</p>
+    </details>
+    <details>
+      <summary>Can I change the decay thresholds?</summary>
+      <p>Yes — go to <strong>Tools → Content Decay → Settings</strong> to configure publish age threshold, modified age threshold, minimum word count, and batch size.</p>
+    </details>
+    <details>
+      <summary>Is the plugin free?</summary>
+      <p>Completely free and open source under GPL v2. No premium tier, no upsells, no external APIs required.</p>
+    </details>
+    <details>
+      <summary>Where can I report bugs or request features?</summary>
+      <p>Open an issue on <a href="https://github.com/stantchev/content-decay-monitor-wordpress-plugin/issues" target="_blank">GitHub</a>. Pull requests following <a href="https://developer.wordpress.org/coding-standards/wordpress-coding-standards/" target="_blank">WordPress Coding Standards</a> are welcome.</p>
+    </details>
+  </div>
 </section>
 
-<!-- ═══ POSTS LIST COLUMN ════════════════════════════════════════ -->
-<section class="section section-alt">
-    <div class="container">
-        <div class="section-label">Posts list column</div>
-        <h2 class="section-title">Freshness badge at a glance — sortable</h2>
-        <p class="section-desc">A colour-coded badge appears on every row. Green, amber, or red — no ambiguity about which posts need attention.</p>
-        <div class="table-mockup">
-            <div class="tm-inner">
-                <div class="tm-header-row">
-                    <div>Title</div>
-                    <div style="text-align:center;">Freshness ↑</div>
-                    <div>Last Modified</div>
-                    <div>Date</div>
-                </div>
-                <div class="tm-row">
-                    <div><div class="tm-title">Best Marketing Tools of 2019</div><span class="tm-type">post</span></div>
-                    <div style="text-align:center;"><span class="cdm-badge cdm-red">17</span></div>
-                    <div class="tm-last">3 years ago</div>
-                    <div class="tm-last" style="color:#646970;">Aug 2019</div>
-                </div>
-                <div class="tm-row">
-                    <div><div class="tm-title">Remote Work Guide 2021</div><span class="tm-type">post</span></div>
-                    <div style="text-align:center;"><span class="cdm-badge cdm-red">31</span></div>
-                    <div class="tm-last">14 months ago</div>
-                    <div class="tm-last" style="color:#646970;">Dec 2021</div>
-                </div>
-                <div class="tm-row">
-                    <div><div class="tm-title">SEO Fundamentals Update</div><span class="tm-type">post</span></div>
-                    <div style="text-align:center;"><span class="cdm-badge cdm-amber">62</span></div>
-                    <div class="tm-last">7 months ago</div>
-                    <div class="tm-last" style="color:#646970;">Jul 2023</div>
-                </div>
-                <div class="tm-row">
-                    <div><div class="tm-title">Getting Started with WordPress</div><span class="tm-type">post</span></div>
-                    <div style="text-align:center;"><span class="cdm-badge cdm-green">91</span></div>
-                    <div class="tm-last">2 months ago</div>
-                    <div class="tm-last" style="color:#646970;">Nov 2024</div>
-                </div>
-                <div class="tm-row">
-                    <div><div class="tm-title">Privacy Policy</div><span class="tm-type">page</span></div>
-                    <div style="text-align:center;"><span class="cdm-na cdm-badge">—</span></div>
-                    <div class="tm-last">—</div>
-                    <div class="tm-last" style="color:#646970;">Jan 2020</div>
-                </div>
-            </div>
+<!-- ═══ INSTALL ══ -->
+<section class="section" id="install" style="border-bottom:none;padding-bottom:clamp(40px,7vw,72px)">
+  <div class="section-inner">
+    <div class="install-card">
+      <div>
+        <h2>Ready to stop losing rankings?</h2>
+        <p>Download the .zip, upload via Plugins → Add New → Upload Plugin. The Freshness Score column appears on your Posts list immediately.</p>
+        <div class="install-reqs">
+          <span>WordPress 6.5+</span>
+          <span>PHP 7.4+</span>
+          <span>Admin access only</span>
+          <span>No external APIs</span>
         </div>
-    </div>
-</section>
-
-<!-- ═══ RISK LEVELS ══════════════════════════════════════════════ -->
-<section class="section">
-    <div class="container">
-        <div class="section-label">Risk levels</div>
-        <h2 class="section-title">Three clear tiers, zero guesswork</h2>
-        <p class="section-desc">Score thresholds translate directly into recommended action.</p>
-        <div class="palette-row">
-            <div class="palette-swatch swatch-green">
-                <strong>🟢 Low Risk</strong>
-                <span class="swatch-range">Score 80–100</span>
-                <span class="swatch-label">Content is fresh. Monitor quarterly.</span>
-            </div>
-            <div class="palette-swatch swatch-amber">
-                <strong>🟠 Medium Risk</strong>
-                <span class="swatch-range">Score 50–79</span>
-                <span class="swatch-label">Review and consider updating within 30 days.</span>
-            </div>
-            <div class="palette-swatch swatch-red">
-                <strong>🔴 High Risk</strong>
-                <span class="swatch-range">Score 0–49</span>
-                <span class="swatch-label">Prioritise for immediate refresh or consolidation.</span>
-            </div>
+        <div class="install-links">
+          <a href="https://github.com/stantchev/content-decay-monitor-wordpress-plugin" target="_blank" rel="noopener" class="install-link">⭐ GitHub Repository</a>
+          <a href="https://github.com/stantchev/content-decay-monitor-wordpress-plugin/releases" target="_blank" rel="noopener" class="install-link">📥 Latest Release v1.0.0</a>
+          <a href="https://github.com/stantchev/content-decay-monitor-wordpress-plugin/issues" target="_blank" rel="noopener" class="install-link">🐛 Report a Bug</a>
         </div>
+      </div>
+      <div>
+        <a href="https://github.com/stantchev/content-decay-monitor-wordpress-plugin/releases/latest" target="_blank" rel="noopener" class="install-cta">Download v1.0.0 →</a>
+      </div>
     </div>
-</section>
-
-<!-- ═══ CRON ══════════════════════════════════════════════════════ -->
-<section class="section section-alt">
-    <div class="container">
-        <div class="section-label">WP-Cron automation</div>
-        <h2 class="section-title">Daily background scans — no manual work</h2>
-        <p class="section-desc">A transient-based offset lets each daily cron fire advance the scan window safely across large sites with thousands of posts.</p>
-        <div class="cron-diagram">
-            <div class="cron-step">
-                <div class="cron-step-num">STEP 01</div>
-                <h4>Plugin Activates</h4>
-                <p>Registers <code style="font-size:10px;background:var(--paper-2);padding:1px 4px;border-radius:3px;">cdm_daily_scan</code> WP-Cron event on activation.</p>
-            </div>
-            <div class="cron-step">
-                <div class="cron-step-num">STEP 02</div>
-                <h4>Cron Fires</h4>
-                <p>Once per day, retrieves the stored transient offset (defaults to 0 for a fresh cycle).</p>
-            </div>
-            <div class="cron-step">
-                <div class="cron-step-num">STEP 03</div>
-                <h4>Batch Scanned</h4>
-                <p>Scans up to 20 posts (configurable). Updates <code style="font-size:10px;background:var(--paper-2);padding:1px 4px;border-radius:3px;">_cdm_score</code> meta on each.</p>
-            </div>
-            <div class="cron-step">
-                <div class="cron-step-num">STEP 04</div>
-                <h4>Offset Advances</h4>
-                <p>Saves new offset to transient. Next fire resumes from there. Resets when all posts are covered.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ═══ ARCHITECTURE ═════════════════════════════════════════════ -->
-<section class="section">
-    <div class="container">
-        <div class="section-label">Plugin architecture</div>
-        <h2 class="section-title">Six focused classes, one responsibility each</h2>
-        <p class="section-desc">Object-oriented, WordPress Coding Standards compliant, and easy to extend for custom post types or additional decay signals.</p>
-        <div class="arch-grid">
-            <div class="arch-file">
-                <div class="arch-file-tag tag-core">core</div>
-                <div class="arch-file-name">content-decay-monitor.php</div>
-                <div class="arch-file-desc">Bootstrap, constants, activation &amp; deactivation hooks, singleton loader</div>
-            </div>
-            <div class="arch-file">
-                <div class="arch-file-tag tag-logic">logic</div>
-                <div class="arch-file-name">class-cdm-helpers.php</div>
-                <div class="arch-file-desc">Stateless utilities — word count, link count, regex, date math, label mapping</div>
-            </div>
-            <div class="arch-file">
-                <div class="arch-file-tag tag-logic">logic</div>
-                <div class="arch-file-name">class-cdm-score.php</div>
-                <div class="arch-file-desc">Pure scoring logic with weighted deductions. No I/O — easily unit-testable</div>
-            </div>
-            <div class="arch-file">
-                <div class="arch-file-tag tag-logic">logic</div>
-                <div class="arch-file-name">class-cdm-scanner.php</div>
-                <div class="arch-file-desc">Batch post fetching with fields=ids, signal gathering, meta persistence</div>
-            </div>
-            <div class="arch-file">
-                <div class="arch-file-tag tag-ui">ui</div>
-                <div class="arch-file-name">class-cdm-admin.php</div>
-                <div class="arch-file-desc">Tools submenu, dashboard table, settings form, three AJAX handlers</div>
-            </div>
-            <div class="arch-file">
-                <div class="arch-file-tag tag-ui">ui</div>
-                <div class="arch-file-name">class-cdm-columns.php</div>
-                <div class="arch-file-desc">Posts list column, colour badge, sort query handler</div>
-            </div>
-            <div class="arch-file">
-                <div class="arch-file-tag tag-logic">logic</div>
-                <div class="arch-file-name">class-cdm-cron.php</div>
-                <div class="arch-file-desc">WP-Cron event, transient-based offset, batch resumption across fires</div>
-            </div>
-            <div class="arch-file">
-                <div class="arch-file-tag tag-assets">assets</div>
-                <div class="arch-file-name">assets/admin.css</div>
-                <div class="arch-file-desc">Badge colours, table column widths, settings panel. Enqueued on plugin page only</div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ═══ CUSTOMIZATION ════════════════════════════════════════════ -->
-<section class="section section-alt">
-    <div class="container">
-        <div class="section-label">Customization</div>
-        <h2 class="section-title">Extend with filters &amp; action hooks</h2>
-        <p class="section-desc">Add custom post types, widen the stale year range, or react to scan events from your theme or mu-plugin.</p>
-        <div class="hooks-grid">
-            <div>
-                <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-4);margin-bottom:6px;">ADD CUSTOM POST TYPES</div>
-                <div class="code-block"><span class="kw">add_filter</span>( <span class="str">'cdm_post_types'</span>, <span class="kw">function</span>( $types ) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;$types[] = <span class="str">'product'</span>; <span class="cm">// WooCommerce</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;$types[] = <span class="str">'event'</span>;   <span class="cm">// Custom CPT</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> $types;<br>
-} );</div>
-            </div>
-            <div>
-                <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-4);margin-bottom:6px;">WIDEN THE STALE YEAR RANGE</div>
-                <div class="code-block"><span class="kw">add_filter</span>( <span class="str">'cdm_stale_year_pattern'</span>, <span class="kw">function</span>() {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// Extend to catch 2015–2024</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="str">'/\b(201[5-9]|202[0-4])\b/'</span>;<br>
-} );</div>
-            </div>
-            <div>
-                <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-4);margin-bottom:6px;">HOOK INTO SINGLE POST SCAN</div>
-                <div class="code-block"><span class="kw">add_action</span>( <span class="str">'cdm_post_scanned'</span>,<br>
-&nbsp;&nbsp;<span class="kw">function</span>( $post_id, $score, $signals ) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// Push to analytics, log, alert…</span><br>
-}, <span class="num">10</span>, <span class="num">3</span> );</div>
-            </div>
-            <div>
-                <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-4);margin-bottom:6px;">HOOK INTO BATCH COMPLETE</div>
-                <div class="code-block"><span class="kw">add_action</span>( <span class="str">'cdm_batch_complete'</span>,<br>
-&nbsp;&nbsp;<span class="kw">function</span>( $count, $offset ) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// Send Slack summary, etc.</span><br>
-}, <span class="num">10</span>, <span class="num">2</span> );</div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ═══ FAQ ══════════════════════════════════════════════════════ -->
-<section class="section">
-    <div class="container">
-        <div class="section-label">FAQ</div>
-        <h2 class="section-title">Frequently asked questions</h2>
-        <p class="section-desc" style="margin-bottom:20px;">Quick answers to common questions about Content Decay Monitor.</p>
-
-        <details open>
-            <summary>Does scanning affect site performance?</summary>
-            <p>No. Scans are triggered manually via AJAX or by the background WP-Cron job. The scanner uses <code>fields=ids</code> queries to avoid loading full post objects until needed, and results are cached in post meta so no computation happens on the front end or on page load.</p>
-        </details>
-        <details>
-            <summary>Can I scan custom post types beyond "post"?</summary>
-            <p>Yes — use the <code>cdm_post_types</code> filter to add any post type. See the Customization section above for an example.</p>
-        </details>
-        <details>
-            <summary>What happens if I have thousands of posts?</summary>
-            <p>The daily WP-Cron job scans in batches (default 20) and stores its offset in a transient. Each daily fire advances the window until all posts are covered, then the cycle resets — no timeouts, no memory pressure.</p>
-        </details>
-        <details>
-            <summary>Where is the score data stored?</summary>
-            <p>In standard post meta under the keys <code>_cdm_score</code> (integer 0–100) and <code>_cdm_last_scan</code> (UTC datetime). No custom tables. Data is removed on plugin uninstall.</p>
-        </details>
-        <details>
-            <summary>Can I change the decay thresholds?</summary>
-            <p>Yes — go to <strong>Tools → Content Decay → Settings</strong> to configure publish age threshold, modified age threshold, minimum word count, and batch size.</p>
-        </details>
-        <details>
-            <summary>Is the plugin free?</summary>
-            <p>Completely free and open source under GPL v2. No premium tier, no upsells, no external APIs required.</p>
-        </details>
-        <details>
-            <summary>Where can I report bugs or request features?</summary>
-            <p>Open an issue on <a href="https://github.com/your-org/content-decay-monitor/issues" target="_blank">GitHub</a>. Pull requests following <a href="https://developer.wordpress.org/coding-standards/wordpress-coding-standards/" target="_blank">WordPress Coding Standards</a> are welcome.</p>
-        </details>
-    </div>
-</section>
-
-<!-- ═══ INSTALL ══════════════════════════════════════════════════ -->
-<section class="section" style="border-bottom:none;padding-bottom:clamp(40px,7vw,72px);">
-    <div class="container">
-        <div class="install-card">
-            <div>
-                <h2>Ready to stop losing rankings?</h2>
-                <p>Download the .zip, upload via Plugins → Add New → Upload Plugin.<br>The Freshness Score column appears on your Posts list immediately.</p>
-                <div class="install-reqs">
-                    <span>WordPress 6.5+</span>
-                    <span>PHP 7.4+</span>
-                    <span>Admin access only</span>
-                    <span>No external APIs</span>
-                </div>
-                <div class="install-links">
-                    <a href="https://github.com/your-org/content-decay-monitor" target="_blank" rel="noopener" class="install-link">⭐ GitHub Repository</a>
-                    <a href="https://github.com/your-org/content-decay-monitor/releases" target="_blank" rel="noopener" class="install-link">📥 Latest Release v1.0.0</a>
-                    <a href="https://github.com/your-org/content-decay-monitor/issues" target="_blank" rel="noopener" class="install-link">🐛 Report a Bug</a>
-                </div>
-            </div>
-            <div>
-                <a href="https://github.com/your-org/content-decay-monitor/releases/latest" target="_blank" rel="noopener" class="install-cta">Download v1.0.0 →</a>
-            </div>
-        </div>
-    </div>
+  </div>
 </section>
 
 <footer class="footer">
-    <p>Content Decay Monitor · Open Source under GPL v2 ·
-       <a href="https://github.com/your-org/content-decay-monitor" target="_blank" rel="noopener">GitHub</a> ·
-       Built for WordPress teams who care about content quality · © 2026</p>
+  <p>Content Decay Monitor · Open Source under GPL v2 ·
+     <a href="https://github.com/stantchev/content-decay-monitor-wordpress-plugin" target="_blank" rel="noopener">GitHub</a> ·
+     Built for WordPress teams who care about content quality · © Milen Stanchev 2026</p>
 </footer>
 
 </body>
